@@ -1,4 +1,4 @@
-FROM runpod/serverless:0.4.0
+FROM runpod/serverless:latest
 
 COPY handler.py /handler.py
 COPY runpod.toml /runpod.toml
