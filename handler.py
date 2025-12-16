@@ -41,7 +41,7 @@ def load_model():
     ).to(device)
 
     model.eval()
-    print("✅ Model loaded")
+    print("Model loaded")
 
 
 def handler(event):
@@ -61,7 +61,7 @@ def handler(event):
     with torch.no_grad():
         output = model.generate(
             **inputs,
-            max_new_tokens=130,
+            max_new_tokens=40,
             temperature=0.7,
             top_p=0.9,
             do_sample=True,
