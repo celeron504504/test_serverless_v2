@@ -2,39 +2,34 @@ import runpod
 import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from huggingface_hub import snapshot_download, login
+from huggingface_hub import snapshot_download
 
 MODEL_NAME = "SURENKUMAAR/deepseek-msu-chatbot-v1"
 CACHE_DIR = "./hf_cache"
 
-# -------------------------------------------------
-# Hugging Face Authentication
-# -------------------------------------------------
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-if HF_TOKEN:
-    login(token=HF_TOKEN)
-    print("🔐 Hugging Face token loaded")
-else:
-    print("⚠️ No Hugging Face token found (public models only)")
+tokenizer = None
+model = None
+device = None
 
 
-def download_model_if_needed():
-    print("🔍 Checking / downloading model...")
-    return snapshot_download(
-        repo_id=MODEL_NAME,
-        cache_dir=CACHE_DIR,
-        resume_download=True,
-        token=HF_TOKEN
-    )
+def load_model():
+    global tokenizer, model, device
 
+    if model is not None:
+        return
 
-def load_model(model_path):
+    print("🔄 Loading model...")
+
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA not available")
 
     device = torch.device("cuda")
-    print("🚀 Using CUDA")
+
+    model_path = snapshot_download(
+        repo_id=MODEL_NAME,
+        cache_dir=CACHE_DIR,
+        resume_download=True,
+    )
 
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     if tokenizer.pad_token is None:
@@ -46,23 +41,27 @@ def load_model(model_path):
     ).to(device)
 
     model.eval()
-    return tokenizer, model, device
+    print("✅ Model loaded")
 
 
-print("⏳ Loading model at startup...")
-model_path = download_model_if_needed()
-tokenizer, model, DEVICE = load_model(model_path)
+def handler(event):
+    print("EVENT:", event)
 
+    prompt = event["input"].get("prompt", "")
+    if not prompt:
+        return {"error": "No prompt provided"}
 
+    load_model()
 
-def ask_question(question, max_new_tokens=256):
-    prompt = f"User: {question}\nAssistant:"
-    inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
+    inputs = tokenizer(
+        f"User: {prompt}\nAssistant:",
+        return_tensors="pt"
+    ).to(device)
 
     with torch.no_grad():
         output = model.generate(
             **inputs,
-            max_new_tokens=max_new_tokens,
+            max_new_tokens=256,
             temperature=0.7,
             top_p=0.9,
             do_sample=True,
@@ -70,18 +69,7 @@ def ask_question(question, max_new_tokens=256):
         )
 
     response = tokenizer.decode(output[0], skip_special_tokens=True)
-    return response.split("Assistant:")[-1].strip()
-
-
-def handler(event):
-    print("EVENT:", event)
-
-    question = event["input"].get("prompt", "")
-    if not question:
-        return {"error": "No prompt provided"}
-
-    return {"message": ask_question(question)}
-
+    return {"message": response.split("Assistant:")[-1].strip()}
 
 
 runpod.serverless.start({"handler": handler})
