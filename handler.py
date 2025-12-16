@@ -99,6 +99,11 @@ tokenizer, model = load_model(model_path)
 
 
 def handler(event):
-    question = event.get("text", "")
+    # RunPod async payload structure
+    question = event["input"].get("prompt", "")
+
+    if not question:
+        return {"error": "No prompt provided"}
+
     answer = ask_question(model, tokenizer, question)
     return {"message": answer}
