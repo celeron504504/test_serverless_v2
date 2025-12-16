@@ -92,11 +92,11 @@ if __name__ == "__main__":
     # answer = ask_question(model, tokenizer, question)
     # print("Bot:", answer)
 
-    def handler(event):
-        prompt = event["input"]["prompt"]
-        answer = ask_question(model, tokenizer, prompt)
+def handler(event):
+    prompt = event["input"]["prompt"]
+    answer = ask_question(model, tokenizer, prompt)
 
-        return {"message": answer}
+    return {"message": answer}
 
 
 
