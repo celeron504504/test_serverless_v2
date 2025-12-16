@@ -53,23 +53,34 @@ def handler(event):
 
     load_model()
 
-    inputs = tokenizer(
-        f"User: {prompt}\nAssistant:",
-        return_tensors="pt"
+    inputs = tokenizer.apply_chat_template(
+    [{"role": "user", "content": prompt}],
+    return_tensors="pt"
     ).to(device)
+
+    
+    #inputs = tokenizer(
+    #    f"User: {prompt}\nAssistant:",
+    #    return_tensors="pt"
+    #).to(device)
 
     with torch.no_grad():
         output = model.generate(
             **inputs,
-            max_new_tokens=40,
+            min_new_tokens=30,
+            max_new_tokens=120,
             temperature=0.2,
             top_k=50,
             top_p=0.8,
             do_sample=False,
+            eos_token_id=tokenizer.eos_token_id,
             pad_token_id=tokenizer.eos_token_id
         )
 
-    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    response_ids = output[0][inputs["input_ids"].shape[-1]:]
+    response = tokenizer.decode(response_ids, skip_special_tokens=True)
+    
+    #response = tokenizer.decode(output[0], skip_special_tokens=True)
     return {"message": response.split("Assistant:")[-1].strip()}
 
 
