@@ -7,7 +7,7 @@ from huggingface_hub import snapshot_download
 MODEL_NAME = "SURENKUMAAR/deepseek-msu-chatbot-v1"
 CACHE_DIR = "./hf_cache"
 
-tokenizer = None
+tokenizer = None 
 model = None
 device = None
 
