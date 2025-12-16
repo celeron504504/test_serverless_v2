@@ -1,4 +1,1 @@
 runpod
-os
-torch
-transformers
