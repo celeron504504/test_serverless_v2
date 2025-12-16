@@ -63,7 +63,7 @@ def handler(event):
             **inputs,
             max_new_tokens=40,
             temperature=0.2,
-            top_p=0.9,
+            top_p=0.8,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id
         )
