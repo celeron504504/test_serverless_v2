@@ -53,11 +53,14 @@ def handler(event):
 
     load_model()
 
-    inputs = tokenizer.apply_chat_template(
-    [{"role": "user", "content": prompt}],
-    return_tensors="pt"
-    ).to(device)
+    #inputs = tokenizer.apply_chat_template(
+    #[{"role": "user", "content": prompt}],
+    #return_tensors="pt"
+    #).to(device)
 
+
+    inputs = tokenizer(prompt, return_tensors="pt")
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
     
     #inputs = tokenizer(
     #    f"User: {prompt}\nAssistant:",
