@@ -107,3 +107,5 @@ def handler(event):
 
     answer = ask_question(model, tokenizer, question)
     return {"message": answer}
+
+runpod.serverless.start({"handler": handler})
