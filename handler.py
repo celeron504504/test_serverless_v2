@@ -1,5 +1,4 @@
 import runpod
-import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from huggingface_hub import snapshot_download
@@ -7,7 +6,7 @@ from huggingface_hub import snapshot_download
 MODEL_NAME = "SURENKUMAAR/deepseek-msu-chatbot-v1"
 CACHE_DIR = "./hf_cache"
 
-tokenizer = None 
+tokenizer = None
 model = None
 device = None
 
@@ -41,7 +40,7 @@ def load_model():
     ).to(device)
 
     model.eval()
-    print("Model loaded")
+    print("✅ Model loaded")
 
 
 def handler(event):
@@ -53,23 +52,20 @@ def handler(event):
 
     load_model()
 
-    #inputs = tokenizer.apply_chat_template(
-    #[{"role": "user", "content": prompt}],
-    #return_tensors="pt"
-    #).to(device)
-
-
-    #inputs = tokenizer(prompt, return_tensors="pt")
-    #inputs = {k: v.to(model.device) for k, v in inputs.items()}
-    
-    inputs = tokenizer(
+    # ---- TOKENIZATION (DICT → TENSORS) ----
+    enc = tokenizer(
         f"User: {prompt}\nAssistant:",
         return_tensors="pt"
-    ).to(device)
+    )
 
+    input_ids = enc["input_ids"].to(device)
+    attention_mask = enc["attention_mask"].to(device)
+
+    # ---- GENERATION ----
     with torch.no_grad():
-        output = model.generate(
-            **inputs,
+        output_ids = model.generate(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
             max_new_tokens=100,
             do_sample=True,
             temperature=0.7,
@@ -77,8 +73,11 @@ def handler(event):
             pad_token_id=tokenizer.eos_token_id
         )
 
-    response = tokenizer.decode(output[0], skip_special_tokens=True)
-    return {"message": response.split("Assistant:")[-1].strip()}
+    # ---- DECODE ONLY NEW TOKENS ----
+    generated_ids = output_ids[0][input_ids.shape[-1]:]
+    response = tokenizer.decode(generated_ids, skip_special_tokens=True)
+
+    return {"message": response.strip()}
 
 
 runpod.serverless.start({"handler": handler})
