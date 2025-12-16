@@ -62,7 +62,7 @@ def handler(event):
         output = model.generate(
             **inputs,
             max_new_tokens=40,
-            temperature=0.7,
+            temperature=0.2,
             top_p=0.9,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id
