@@ -67,8 +67,8 @@ def handler(event):
     with torch.no_grad():
         output = model.generate(
             **inputs,
-            min_new_tokens=30,
-            max_new_tokens=120,
+            min_new_tokens=10,
+            max_new_tokens=100,
             temperature=0.2,
             top_k=50,
             top_p=0.8,
