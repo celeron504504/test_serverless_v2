@@ -59,13 +59,13 @@ def handler(event):
     #).to(device)
 
 
-    inputs = tokenizer(prompt, return_tensors="pt")
-    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+    #inputs = tokenizer(prompt, return_tensors="pt")
+    #inputs = {k: v.to(model.device) for k, v in inputs.items()}
     
-    #inputs = tokenizer(
-    #    f"User: {prompt}\nAssistant:",
-    #    return_tensors="pt"
-    #).to(device)
+    inputs = tokenizer(
+        f"User: {prompt}\nAssistant:",
+        return_tensors="pt"
+    ).to(device)
 
     with torch.no_grad():
         output = model.generate(
