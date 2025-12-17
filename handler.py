@@ -57,11 +57,15 @@ def handler(event):
         #f"User: {prompt}\nAssistant:",
         #return_tensors="pt"
     #)
-
+    
     enc = tokenizer(
-    f"Answer the following question clearly and factually:\n\n{prompt}\n\nAnswer:",
-    return_tensors="pt"
-)
+        f"""You are a factual assistant.
+    Answer accurately and briefly.
+    
+    Question: {prompt}
+    Answer:""",
+        return_tensors="pt"
+    )
 
 
     
