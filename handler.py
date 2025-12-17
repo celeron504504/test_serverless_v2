@@ -77,11 +77,11 @@ def handler(event):
     generated_ids = output_ids[0][input_ids.shape[-1]:]
     response = tokenizer.decode(generated_ids, skip_special_tokens=True)
 
-    message = response["output"]["message"]
-    message = message.split("\n")[0]
+    #message = response["output"]["message"]
+    #message = message.split("\n")[0]
     
-    #return {"message": response.strip()}
-    return {"message": message}
+    return {"message": response.strip()}
+    #return {"message": message}
 
 
 runpod.serverless.start({"handler": handler})
