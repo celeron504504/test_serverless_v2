@@ -53,11 +53,18 @@ def handler(event):
     load_model()
 
     # ---- TOKENIZATION (DICT → TENSORS) ----
-    enc = tokenizer(
-        f"User: {prompt}\nAssistant:",
-        return_tensors="pt"
-    )
+    #enc = tokenizer(
+        #f"User: {prompt}\nAssistant:",
+        #return_tensors="pt"
+    #)
 
+    enc = tokenizer(
+    f"Answer the following question clearly and factually:\n\n{prompt}\n\nAnswer:",
+    return_tensors="pt"
+)
+
+
+    
     input_ids = enc["input_ids"].to(device)
     attention_mask = enc["attention_mask"].to(device)
 
@@ -66,10 +73,9 @@ def handler(event):
         output_ids = model.generate(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            max_new_tokens=100,
-            do_sample=True,
-            temperature=0.7,
-            top_p=0.8,
+            max_new_tokens=60,
+            do_sample=False,
+            repetition_penalty=1.2,
             pad_token_id=tokenizer.eos_token_id
         )
 
